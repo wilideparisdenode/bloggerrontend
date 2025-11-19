@@ -1,32 +1,3 @@
-/*
-TipTap Rich Text Editor React Component
---------------------------------------
-Drop this file into your React app (e.g. src/components/TipTapRichEditor.jsx)
-
-Install required packages:
-
-npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-link @tiptap/extension-image @tiptap/extension-placeholder react-icons
-
-Optional (if you want bubble menu / floating menu):
-npm install @tiptap/extension-bubble-menu @tiptap/extension-floating-menu
-
-This component:
-- Uses TipTap (ProseMirror) under the hood
-- Stores/returns HTML (so you can persist it in DB and rehydrate without loss)
-- Toolbar includes bold, italic, headings, lists, quote, codeblock, links, images, undo/redo
-- Supports image insertion via prompt or a provided uploadImage function (prop)
-- Exposes onSave(html) callback to persist to your backend
-- Accepts initialContent (HTML string) to rehydrate the editor
-
-Props:
-- initialContent: string (HTML) — initial value loaded into editor
-- onChange: function(html) — called whenever content changes (debounced)
-- onSave: function(html) — called when Save button clicked
-- uploadImage: async function(file) => url (optional) — if provided, used to upload file inputs
-- autoSave: boolean (optional) — if true, calls onSave automatically on change (debounced)
-- className: string (optional) — wrapper classes
-
-*/
 
 import { useEffect, useCallback, useState, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
