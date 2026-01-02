@@ -44,7 +44,7 @@
 }
 
 .category-tag {
-  background: var(--primary-gradient);
+  background: var(--primary-color);
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
@@ -152,11 +152,30 @@
   padding: 1.5rem;
   border-radius: var(--border-radius);
   margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
 }
 
 .author-bio h3 {
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
   color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.author-info p {
+  margin: 0.5rem 0;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.author-info .join-date {
+  color: var(--text-muted);
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.author-bio-text {
+  color: var(--text-secondary) !important;
+  margin-top: 0.75rem !important;
 }
 
 .navigation-links {

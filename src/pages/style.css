@@ -1,12 +1,12 @@
 /* TipTap Rich Editor Wrapper */
 .prose {
   max-width: 100%;
-  background: #fff;
-  border: 1px solid #d1d5db;
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-color, #d1d5db);
   border-radius: 10px;
   padding: 1rem;
   font-family: 'Inter', sans-serif;
-  color: #111827;
+  color: var(--text-primary, #111827);
 }
 
 /* Toolbar */
@@ -17,8 +17,8 @@
   gap: 0.5rem;
   margin-bottom: 0.75rem;
   padding: 0.25rem 0.5rem;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--bg-secondary, #f9fafb);
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
   border-radius: 8px 8px 0 0;
 }
 
@@ -36,12 +36,12 @@
 }
 
 .prose button:hover {
-  background: #e5e7eb;
+  background: var(--bg-secondary, #e5e7eb);
 }
 
 .prose button.active {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary-color, #2563eb);
 }
 
 /* Divider */
@@ -98,37 +98,54 @@
 
 /* Blockquote */
 .editor-body blockquote {
-  border-left: 4px solid #dbeafe;
+  border-left: 4px solid var(--primary-color, #2563eb);
   padding-left: 1rem;
-  color: #374151;
+  color: var(--text-secondary, #374151);
   margin: 0.5rem 0;
   font-style: italic;
-  background: #f3f4f6;
+  background: var(--bg-secondary, #f3f4f6);
   border-radius: 4px;
 }
 
 /* Code / Codeblock */
 .editor-body code {
-  background: #f3f4f6;
+  background: var(--bg-secondary, #f3f4f6);
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-family: 'Source Code Pro', monospace;
+  color: var(--text-primary, #111827);
 }
 
 .editor-body pre {
-  background: #f3f4f6;
+  background: var(--bg-secondary, #f3f4f6);
   padding: 1rem;
   overflow-x: auto;
   border-radius: 6px;
   font-family: 'Source Code Pro', monospace;
+  color: var(--text-primary, #111827);
 }
 
 /* Images */
 .editor-body img {
-  max-width: 100%;
+  max-width: 100% !important;
+  height: auto !important;
   display: block;
-  margin: 0.5rem 0;
-  border-radius: 6px;
+  margin: 1rem auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  object-fit: contain;
+}
+
+/* Ensure images in article content are responsive */
+.article-content img,
+.article-detail img,
+.article-content img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+  margin: 1rem auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Stats / Footer */

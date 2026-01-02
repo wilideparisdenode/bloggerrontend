@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaSun, FaMoon, FaSearch } from 'react-icons/fa';
+import { FaSun, FaMoon} from 'react-icons/fa';
 
 const NavBar = () => {
   const [searchQuery, setSearchQuery] = useState('');

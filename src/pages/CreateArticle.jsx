@@ -8,6 +8,8 @@ import "../styles/createArticle.css";
 const CreateArticle = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -40,20 +42,26 @@ setFormData((prev)=>({...prev,file:file}))
     setIsLoading(true);
 
     if (!formData.title.trim() || !formData.content.trim()) {
-      alert('Please fill in title and content');
+      setError('Please fill in title and content');
       setIsLoading(false);
+      setTimeout(() => setError(null), 3000);
       return;
     }
 
+    setError(null);
     try {
       console.log('Saving article:', formData);
-    const   res=  await API.createArticle(formData);
-       if(res) {
-        navigate('/dash-board');
-       } 
+      const res = await API.createArticle(formData);
+      if(res) {
+        setSuccess('Article published successfully!');
+        setTimeout(() => {
+          navigate('/dash-board');
+        }, 1000);
+      } 
     } catch (error) {
       console.error('Error publishing article:', error);
-      alert('Error publishing article. Please try again.');
+      setError(error.message || 'Error publishing article. Please try again.');
+      setTimeout(() => setError(null), 5000);
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +72,8 @@ setFormData((prev)=>({...prev,file:file}))
     const draftData = { ...formData, savedAt: new Date().toISOString() };
     drafts.push(draftData);
     localStorage.setItem('articleDrafts', JSON.stringify(drafts));
-    alert('Draft saved!');
+    setSuccess('Draft saved successfully!');
+    setTimeout(() => setSuccess(null), 3000);
   };
 
   return (
@@ -77,6 +86,32 @@ setFormData((prev)=>({...prev,file:file}))
       </div>
 
       <form onSubmit={handleSubmit} className="article-form">
+        {/* Error/Success Messages */}
+        {error && (
+          <div className="error-message" style={{
+            padding: '0.75rem 1rem',
+            background: 'rgba(220, 38, 38, 0.1)',
+            color: '#dc2626',
+            borderRadius: '8px',
+            border: '1px solid #dc2626',
+            marginBottom: '1rem'
+          }}>
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="success-message" style={{
+            padding: '0.75rem 1rem',
+            background: 'rgba(34, 197, 94, 0.1)',
+            color: '#22c55e',
+            borderRadius: '8px',
+            border: '1px solid #22c55e',
+            marginBottom: '1rem'
+          }}>
+            {success}
+          </div>
+        )}
+        
         {/* Title Section */}
         <div className="title-section">
           <input

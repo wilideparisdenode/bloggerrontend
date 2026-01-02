@@ -5,23 +5,20 @@ function AbouteMe() {
    // Example for a React/Next.js component
 <div className='about_us'>
   <div className='section'>
-    {/* Assuming this is a key section, an h2 is more appropriate */}
     <h2>
-      Lorem ipsum dolor sit.
+      Share Your Knowledge with the World
     </h2>
-    {/* Changed div to a span and added a class for styling. strong or em could also work. */}
     <span className='subheading'>
-      Lorem, ipsum.
+      Write, Publish, Inspire
     </span>
     <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit ab excepturi eos ex quia architecto voluptatum eveniet provident pariatur sapiente cupiditate est eius recusandae neque, sint possimus maxime illo! Quis!
+      Our platform empowers writers to share their expertise and connect with readers who are passionate about learning. Whether you're a developer sharing coding tips, a designer discussing UI trends, or a business expert offering insights, this is your space to make an impact.
     </p>
     <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. In, quo.
+      Join thousands of writers who are already sharing their stories and building their audience. Start writing today and let your voice be heard.
     </p>
-    {/* Added type="button" and fixed the text */}
-    <button type="button">
-      Get started
+    <button type="button" onClick={() => window.location.href = '/create-ariticle'}>
+      Start Writing
     </button>
   </div>
   <div className='section'>

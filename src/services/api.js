@@ -113,9 +113,26 @@ class APIService {
     }
 
     async updateArticle(articleId, articleData) {
+        const formData = new FormData();
+        
+        // Append all fields
+        if (articleData.title !== undefined) formData.append('title', articleData.title);
+        if (articleData.content !== undefined) formData.append('content', articleData.content);
+        if (articleData.category !== undefined) formData.append('category', articleData.category);
+        if (articleData.tags !== undefined) {
+            formData.append('tags', Array.isArray(articleData.tags) ? articleData.tags.join(' ') : articleData.tags);
+        }
+        if (articleData.excerpt !== undefined) formData.append('excerpt', articleData.excerpt);
+        if (articleData.status !== undefined) formData.append('status', articleData.status);
+        
+        // Append the file if provided
+        if (articleData.file) {
+            formData.append('file', articleData.file);
+        }
+
         return this.request(`/articles/${articleId}`, {
             method: 'PUT',
-            data: articleData
+            data: formData,
         });
     }
 

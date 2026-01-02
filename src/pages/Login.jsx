@@ -10,6 +10,7 @@ const Login = () => {
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,6 +24,7 @@ const Login = () => {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
+  setError(null);
   setIsLoading(true);
   
   try {
@@ -30,6 +32,8 @@ const handleSubmit = async (e) => {
     navigate('/dash-board');
   } catch (error) {
     console.error('Login error:', error);
+    setError(error.message || 'Invalid email or password. Please try again.');
+    setTimeout(() => setError(null), 5000);
   } finally {
     setIsLoading(false);
   }
@@ -40,6 +44,20 @@ const handleSubmit = async (e) => {
       <div className="auth-card">
         <h2>Welcome Back</h2>
         <p className="auth-subtitle">Sign in to your account</p>
+        
+        {error && (
+          <div className="error-message" style={{
+            padding: '0.75rem 1rem',
+            background: 'rgba(220, 38, 38, 0.1)',
+            color: '#dc2626',
+            borderRadius: '8px',
+            border: '1px solid #dc2626',
+            marginBottom: '1rem',
+            fontSize: '0.875rem'
+          }}>
+            {error}
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">

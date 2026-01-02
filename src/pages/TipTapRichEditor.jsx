@@ -7,6 +7,7 @@ import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import { FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaLink, FaImage, FaQuoteRight, FaCode, FaUndo, FaRedo, FaTrash, FaSave } from 'react-icons/fa';
 import "./style.css";
+
 const ToolbarButton = ({ onClick, active, title, children }) => (
   <button
     type="button"
@@ -28,6 +29,7 @@ export default function TipTapRichEditor({
   className = ''
 }) {
   const [html, setHtml] = useState(initialContent || '');
+  const [error, setError] = useState(null);
   const saveTimer = useRef(null);
 
   const editor = useEditor({
@@ -89,32 +91,97 @@ export default function TipTapRichEditor({
     editor.chain().focus().setImage({ src: url }).run();
   }, [editor]);
 
+  // Image compression function
+  const compressImage = useCallback((file, maxWidth = 1200, maxHeight = 800, quality = 0.8) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions
+          if (width > height) {
+            if (width > maxWidth) {
+              height = (height * maxWidth) / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = (width * maxHeight) / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
+              } else {
+                resolve(file);
+              }
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }, []);
+
   const insertImageFromFile = useCallback(async (file) => {
     if (!editor) return;
     if (!file) return;
 
+    // Validate file size (max 10MB before compression)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Image is too large. Please select an image smaller than 10MB.');
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
+
+    // Compress image before processing
+    const compressedFile = await compressImage(file);
+
     // If uploadImage prop provided, use it to upload and get URL
     if (uploadImage && typeof uploadImage === 'function') {
       try {
-        const url = await uploadImage(file);
+        const url = await uploadImage(compressedFile);
         if (url) {
-          editor.chain().focus().setImage({ src: url }).run();
+          editor.chain().focus().setImage({ 
+            src: url,
+            style: 'max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;'
+          }).run();
         }
       } catch (err) {
         console.error('Image upload failed:', err);
-        alert('Image upload failed');
+        setError(err.message || 'Image upload failed. Please try again.');
+        setTimeout(() => setError(null), 5000);
       }
       return;
     }
 
-    // Fallback: create data URL (embed) — note: big images will bloat DB if saved as HTML
+    // Fallback: create data URL (embed) — note: compressed images are smaller
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result;
-      editor.chain().focus().setImage({ src: dataUrl }).run();
+      editor.chain().focus().setImage({ 
+        src: dataUrl,
+        style: 'max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;'
+      }).run();
     };
-    reader.readAsDataURL(file);
-  }, [editor, uploadImage]);
+    reader.readAsDataURL(compressedFile);
+  }, [editor, uploadImage, compressImage]);
 
   const handleFileInput = useCallback((e) => {
     const file = e.target.files[0];
@@ -162,6 +229,19 @@ export default function TipTapRichEditor({
 
   return (
     <div className={`prose max-w-full bg-white dark:bg-gray-900 border rounded-md p-3 ${className}`}>
+      {error && (
+        <div className="error-message" style={{
+          marginBottom: '0.75rem',
+          padding: '0.75rem 1rem',
+          background: 'rgba(220, 38, 38, 0.1)',
+          color: '#dc2626',
+          borderRadius: '8px',
+          border: '1px solid #dc2626',
+          fontSize: '0.875rem'
+        }}>
+          {error}
+        </div>
+      )}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         {/* Undo/Redo */}
         <ToolbarButton onClick={() => command('undo')} title="Undo"><FaUndo /></ToolbarButton>
@@ -196,12 +276,12 @@ export default function TipTapRichEditor({
 
         {/* Link / Image */}
         <ToolbarButton onClick={setLink} title="Insert / Edit Link"><FaLink /></ToolbarButton>
-        {/* <ToolbarButton onClick={insertImageFromUrl} title="Insert Image from URL"><FaImage /></ToolbarButton> */}
+        <ToolbarButton onClick={insertImageFromUrl} title="Insert Image from URL"><FaImage /></ToolbarButton>
 
         {/* hidden file input for uploads */}
         <input type="file" accept="image/*" id="rte-image-upload" className="hidden" onChange={handleFileInput} />
-        <label htmlFor="rte-image-upload" className="inline-block">
-          {/* <ToolbarButton as="label" title="Upload Image"><FaImage /></ToolbarButton> */}
+        <label htmlFor="rte-image-upload" className="inline-block cursor-pointer">
+          <ToolbarButton as="span" title="Upload Image"><FaImage /></ToolbarButton>
         </label>
 
         <div className="flex-1" />

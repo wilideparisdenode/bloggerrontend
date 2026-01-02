@@ -33,16 +33,47 @@ useEffect(() => {
     setSearchQuery(searchParam);
   }
 }, [location.search]);
-  // Mock articles data
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  // Helper function to calculate reading time
+  const calculateReadingTime = (content) => {
+    if (!content) return '1 min read';
+    const text = content.replace(/<[^>]*>/g, ''); // Remove HTML tags
+    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    const minutes = Math.ceil(words.length / 200);
+    return `${minutes} min read`;
+  };
+
+  // Fetch articles data
   useEffect(() => {
     const fetchArticles = async () => {
       setIsLoading(true);
       try {
-          const Articles=await API.getArticles()
+          const Articles = await API.getArticles()
           console.log(Articles)
-           if (Articles){
-            setArticles(Articles.articles);
-        setFilteredArticles(Articles.articles);
+           if (Articles && Articles.articles){
+            // Map backend data to frontend format
+            const mappedArticles = Articles.articles.map(article => ({
+              ...article,
+              id: article._id || article.id,
+              author: article.authorId?.name || 'Unknown Author',
+              publishDate: formatDate(article.publishedAt || article.createdAt),
+              readTime: calculateReadingTime(article.content),
+              views: article.views || 0,
+              likes: article.likedBy?.length || article.likes || 0
+            }));
+            
+            setArticles(mappedArticles);
+            setFilteredArticles(mappedArticles);
            }
         
       } catch (error) {
@@ -63,9 +94,11 @@ useEffect(() => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(article => 
-        article.title.toLowerCase().includes(query) ||
-        article.excerpt.toLowerCase().includes(query) ||
-        article.author.toLowerCase().includes(query)
+        article.title?.toLowerCase().includes(query) ||
+        article.excerpt?.toLowerCase().includes(query) ||
+        article.author?.toLowerCase().includes(query) ||
+        article.category?.toLowerCase().includes(query) ||
+        article.tags?.some(tag => tag.toLowerCase().includes(query))
       );
     }
 
@@ -77,16 +110,24 @@ useEffect(() => {
     // Sort articles
     switch (sortBy) {
       case 'newest':
-        result.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
+        result.sort((a, b) => {
+          const dateA = new Date(a.publishedAt || a.createdAt || 0);
+          const dateB = new Date(b.publishedAt || b.createdAt || 0);
+          return dateB - dateA;
+        });
         break;
       case 'oldest':
-        result.sort((a, b) => new Date(a.publishDate) - new Date(b.publishDate));
+        result.sort((a, b) => {
+          const dateA = new Date(a.publishedAt || a.createdAt || 0);
+          const dateB = new Date(b.publishedAt || b.createdAt || 0);
+          return dateA - dateB;
+        });
         break;
       case 'popular':
-        result.sort((a, b) => b.views - a.views);
+        result.sort((a, b) => (b.views || 0) - (a.views || 0));
         break;
       case 'title':
-        result.sort((a, b) => a.title.localeCompare(b.title));
+        result.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
         break;
       default:
         break;
@@ -180,7 +221,7 @@ useEffect(() => {
             <article key={article.id} className="article-card">
               <div className="article-image">
                 <img 
-                  src={article.image.cloudinaryUrl} 
+                  src={article.image?.cloudinaryUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMjUgODBIMjc1VjE3MEgxMjVWODBaIiBmaWxsPSIjRjBGMEYwIi8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjEwMCIgcj0iMTUiIGZpbGw9IiNEN0Q3RDciLz4KPHBhdGggZD0iTTE1MCAxNDBIMjUwVjE1MEgxNTBWMTQwWiIgZmlsbD0iI0Q3RDdENyIvPgo8cGF0aCBkPSJNMTUwIDE2MEgyMTVWMTcwSDE1MFYxNjBaIiBmaWxsPSIjRDdEN0Q3Ii8+Cjwvc3ZnPgo='} 
                   alt={article.title}
                   onError={(e) => {
                     e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMjUgODBIMjc1VjE3MEgxMjVWODBaIiBmaWxsPSIjRjBGMEYwIi8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjEwMCIgcj0iMTUiIGZpbGw9IiNEN0Q3RDciLz4KPHBhdGggZD0iTTE1MCAxNDBIMjUwVjE1MEgxNTBWMTQwWiIgZmlsbD0iI0Q3RDdENyIvPgo8cGF0aCBkPSJNMTUwIDE2MEgyMTVWMTcwSDE1MFYxNjBaIiBmaWxsPSIjRDdEN0Q3Ii8+Cjwvc3ZnPgo=';
@@ -191,21 +232,21 @@ useEffect(() => {
               
               <div className="article-content">
                 <h3>
-                  <Link to={`/read-articles/${article.id}`}>
+                  <Link to={`/read-articles/${article.id || article._id}`}>
                     {article.title}
                   </Link>
                 </h3>
                 
-                <p className="article-excerpt">{article.excerpt}</p>
+                <p className="article-excerpt">{article.excerpt || 'No excerpt available'}</p>
                 
                 <div className="article-meta">
                   <div className="meta-left">
-                    <span><FaUser /> {article.author}</span>
-                    <span><FaCalendar /> {article.publishDate}</span>
-                    <span><FaClock /> {article.readTime}</span>
+                    <span><FaUser /> {article.author || 'Unknown'}</span>
+                    <span><FaCalendar /> {article.publishDate || 'N/A'}</span>
+                    <span><FaClock /> {article.readTime || '1 min read'}</span>
                   </div>
                   <div className="meta-right">
-                    <span><FaEye /> {article.views.toLocaleString()}</span>
+                    <span><FaEye /> {(article.views || 0).toLocaleString()}</span>
                   </div>
                 </div>
                 <div className="article-actions">
