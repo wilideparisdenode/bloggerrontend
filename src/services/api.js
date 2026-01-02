@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL ='https://bloggerbackend-1.onrender.com';
+const BASE_URL ='https://bloggerbackend-1.onrender.com/api';
 
 class APIService {
     async request(endpoint, options = {}) {
