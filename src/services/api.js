@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_END_POINT || 'http://localhost:5000/api';
+const BASE_URL ='https://bloggerbackend-1.onrender.com/';
 
 class APIService {
     async request(endpoint, options = {}) {
